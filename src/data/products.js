@@ -1,0 +1,53 @@
+export const products = [
+  {
+    id: 'camiseta-premium-preta',
+    name: 'Camiseta Premium Preta',
+    slug: 'camiseta-premium-preta',
+    price: 119.9,
+    promoPrice: 89.9,
+    description: 'Camiseta premium com tecido confortável, visual moderno e acabamento sofisticado.',
+    categoryId: 'camisetas',
+    images: ['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200', 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=1200'],
+    sizes: ['P', 'M', 'G', 'GG'],
+    colors: ['Preto', 'Branco'],
+    badge: 'Mais vendido',
+    featured: true,
+    active: true,
+    promo: true,
+    stockStatus: 'Disponível'
+  },
+  {
+    id: 'moletom-luxo-off',
+    name: 'Moletom Luxo Off White',
+    slug: 'moletom-luxo-off',
+    price: 229.9,
+    promoPrice: null,
+    description: 'Moletom encorpado com modelagem premium e toque macio para o dia a dia.',
+    categoryId: 'moletons',
+    images: ['https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1200'],
+    sizes: ['M', 'G', 'GG'],
+    colors: ['Off White', 'Preto'],
+    badge: 'Novo',
+    featured: true,
+    active: true,
+    promo: false,
+    stockStatus: 'Disponível'
+  },
+  {
+    id: 'relogio-minimalista',
+    name: 'Relógio Minimalista',
+    slug: 'relogio-minimalista',
+    price: 179.9,
+    promoPrice: 149.9,
+    description: 'Relógio com design limpo, elegante e fácil de combinar.',
+    categoryId: 'acessorios',
+    images: ['https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200'],
+    sizes: ['Único'],
+    colors: ['Preto', 'Prata'],
+    badge: 'Promoção',
+    featured: true,
+    active: true,
+    promo: true,
+    stockStatus: 'Disponível'
+  }
+];
