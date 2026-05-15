@@ -5211,7 +5211,18 @@ body,
   }
 }
 
+@media (max-width: 768px) {
 
-body {
-  outline: 8px solid red !important;
+  .highlights {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  .highlight-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+  }
+
 }
