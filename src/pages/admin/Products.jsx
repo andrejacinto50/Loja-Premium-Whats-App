@@ -23,6 +23,7 @@ import {
 import { getCategories } from '../../services/categoriesService';
 import { formatPrice } from '../../utils/formatPrice';
 import { uploadImage } from '../../services/storageService';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const sizeOptions = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
 
@@ -56,6 +57,8 @@ const emptyProduct = {
 };
 
 export default function Products() {
+  const isMobile = useIsMobile(900);
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -73,9 +76,10 @@ export default function Products() {
     async function loadData() {
       try {
         const [productsData, categoriesData] = await Promise.all([
-  getAllProductsAdmin(),
-  getCategories()
-]);
+          getAllProductsAdmin(),
+          getCategories()
+        ]);
+
         setProducts(productsData || []);
         setCategories(categoriesData || []);
       } catch (error) {
@@ -253,11 +257,12 @@ export default function Products() {
     try {
       const formattedProduct = {
         ...selectedProduct,
-slug:
-  selectedProduct.slug ||
-  (modalMode === 'create'
-    ? `${createSlug(selectedProduct.name)}-${Date.now()}`
-    : createSlug(selectedProduct.name)),
+        name: selectedProduct.name.trim(),
+        slug:
+          selectedProduct.slug ||
+          (modalMode === 'create'
+            ? `${createSlug(selectedProduct.name)}-${Date.now()}`
+            : createSlug(selectedProduct.name)),
         price: Number(selectedProduct.price),
         promoPrice: selectedProduct.promoPrice
           ? Number(selectedProduct.promoPrice)
@@ -305,25 +310,80 @@ slug:
 
   return (
     <AdminLayout>
-      <div className="admin-products-page">
-        <div className="admin-head row">
+      <div
+        className="admin-products-page"
+        style={
+          isMobile
+            ? {
+                display: 'grid',
+                gap: '22px'
+              }
+            : undefined
+        }
+      >
+        <div
+          className="admin-head row"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '18px'
+                }
+              : undefined
+          }
+        >
           <div>
             <span>Gestão</span>
 
-            <h1>Produtos</h1>
+            <h1
+              style={
+                isMobile
+                  ? {
+                      fontSize: 'clamp(42px, 13vw, 60px)',
+                      lineHeight: '.92'
+                    }
+                  : undefined
+              }
+            >
+              Produtos
+            </h1>
 
             <p>
               Gerencie o catálogo, preços, promoções e produtos em destaque.
             </p>
           </div>
 
-          <button className="btn btn-primary" onClick={openCreateModal}>
+          <button
+            className="btn btn-primary"
+            onClick={openCreateModal}
+            style={
+              isMobile
+                ? {
+                    width: '100%',
+                    minHeight: '56px',
+                    justifyContent: 'center'
+                  }
+                : undefined
+            }
+          >
             <Plus size={18} />
             Novo produto
           </button>
         </div>
 
-        <div className="admin-products-toolbar">
+        <div
+          className="admin-products-toolbar"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '12px'
+                }
+              : undefined
+          }
+        >
           <div className="admin-search">
             <Search size={18} />
 
@@ -337,6 +397,15 @@ slug:
           <button
             className={`admin-filter-btn ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
+            style={
+              isMobile
+                ? {
+                    width: '100%',
+                    minHeight: '56px',
+                    justifyContent: 'center'
+                  }
+                : undefined
+            }
           >
             <SlidersHorizontal size={18} />
             Filtros
@@ -344,45 +413,57 @@ slug:
         </div>
 
         {showFilters && (
-          <div className="admin-filter-panel">
-            <button
-              className={filter === 'all' ? 'active' : ''}
-              onClick={() => setFilter('all')}
-            >
-              Todos
-            </button>
-
-            <button
-              className={filter === 'active' ? 'active' : ''}
-              onClick={() => setFilter('active')}
-            >
-              Ativos
-            </button>
-
-            <button
-              className={filter === 'inactive' ? 'active' : ''}
-              onClick={() => setFilter('inactive')}
-            >
-              Desativados
-            </button>
-
-            <button
-              className={filter === 'featured' ? 'active' : ''}
-              onClick={() => setFilter('featured')}
-            >
-              Destaques
-            </button>
-
-            <button
-              className={filter === 'promo' ? 'active' : ''}
-              onClick={() => setFilter('promo')}
-            >
-              Promoções
-            </button>
+          <div
+            className="admin-filter-panel visible"
+            style={
+              isMobile
+                ? {
+                    display: 'flex',
+                    gap: '10px',
+                    overflowX: 'auto',
+                    paddingBottom: '8px'
+                  }
+                : undefined
+            }
+          >
+            {[
+              ['all', 'Todos'],
+              ['active', 'Ativos'],
+              ['inactive', 'Desativados'],
+              ['featured', 'Destaques'],
+              ['promo', 'Promoções']
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                className={filter === value ? 'active' : ''}
+                onClick={() => setFilter(value)}
+                style={
+                  isMobile
+                    ? {
+                        flex: '0 0 auto',
+                        whiteSpace: 'nowrap'
+                      }
+                    : undefined
+                }
+              >
+                {label}
+              </button>
+            ))}
           </div>
         )}
 
-        <div className="admin-products-list">
+        <div
+          className="admin-products-list"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '18px'
+                }
+              : undefined
+          }
+        >
           {loading && (
             <div className="admin-empty-state">
               <strong>Carregando produtos...</strong>
@@ -394,24 +475,111 @@ slug:
               const isActive = product.active !== false;
 
               return (
-                <div className="admin-product-row" key={product.id}>
-                  <div className="admin-product-main">
+                <div
+                  className="admin-product-row"
+                  key={product.id}
+                  style={
+                    isMobile
+                      ? {
+                          display: 'grid',
+                          gridTemplateColumns: '1fr',
+                          gap: '16px',
+                          alignItems: 'stretch',
+                          width: '100%',
+                          borderRadius: '28px',
+                          padding: '18px',
+                          overflow: 'hidden'
+                        }
+                      : undefined
+                  }
+                >
+                  <div
+                    className="admin-product-main"
+                    style={
+                      isMobile
+                        ? {
+                            display: 'grid',
+                            gridTemplateColumns: '92px 1fr',
+                            gap: '14px',
+                            alignItems: 'start',
+                            minWidth: 0
+                          }
+                        : undefined
+                    }
+                  >
                     {product.images?.[0] ? (
-                      <img src={product.images[0]} alt={product.name} />
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        loading="lazy"
+                        style={
+                          isMobile
+                            ? {
+                                width: '92px',
+                                height: '118px',
+                                borderRadius: '20px',
+                                objectFit: 'cover'
+                              }
+                            : undefined
+                        }
+                      />
                     ) : (
                       <div className="admin-empty-state">
                         <strong>Sem imagem</strong>
                       </div>
                     )}
 
-                    <div>
-                      <strong>{product.name}</strong>
+                    <div
+                      style={
+                        isMobile
+                          ? {
+                              minWidth: 0,
+                              display: 'grid',
+                              gap: '8px'
+                            }
+                          : undefined
+                      }
+                    >
+                      <strong
+                        style={
+                          isMobile
+                            ? {
+                                fontSize: '22px',
+                                lineHeight: '1.08',
+                                wordBreak: 'break-word'
+                              }
+                            : undefined
+                        }
+                      >
+                        {product.name}
+                      </strong>
 
-                      <p>
+                      <p
+                        style={
+                          isMobile
+                            ? {
+                                margin: 0,
+                                lineHeight: '1.35'
+                              }
+                            : undefined
+                        }
+                      >
                         {product.badge || 'Produto'} · {product.stockStatus}
                       </p>
 
-                      <div className="admin-product-tags">
+                      <div
+                        className="admin-product-tags"
+                        style={
+                          isMobile
+                            ? {
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '8px',
+                                marginTop: '2px'
+                              }
+                            : undefined
+                        }
+                      >
                         {product.featured && (
                           <span>
                             <Star size={13} />
@@ -428,7 +596,19 @@ slug:
                       </div>
 
                       {!isAccessoryProduct(product) && (
-                        <div className="admin-product-tags">
+                        <div
+                          className="admin-product-tags"
+                          style={
+                            isMobile
+                              ? {
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  gap: '8px',
+                                  marginTop: '2px'
+                                }
+                              : undefined
+                          }
+                        >
                           {product.sizes?.map((size) => (
                             <span key={size}>{size}</span>
                           ))}
@@ -441,17 +621,64 @@ slug:
                     </div>
                   </div>
 
-                  <div className="admin-product-price">
+                  <div
+                    className="admin-product-price"
+                    style={
+                      isMobile
+                        ? {
+                            display: 'grid',
+                            gap: '4px',
+                            alignItems: 'start',
+                            justifyItems: 'start',
+                            paddingLeft: '106px'
+                          }
+                        : undefined
+                    }
+                  >
                     {product.promoPrice && (
-                      <span>{formatPrice(product.price)}</span>
+                      <span
+                        style={
+                          isMobile
+                            ? {
+                                display: 'block',
+                                lineHeight: '1.2',
+                                fontSize: '14px',
+                                textDecoration: 'line-through',
+                                opacity: 0.65
+                              }
+                            : undefined
+                        }
+                      >
+                        {formatPrice(product.price)}
+                      </span>
                     )}
 
-                    <strong>
+                    <strong
+                      style={
+                        isMobile
+                          ? {
+                              display: 'block',
+                              lineHeight: '1',
+                              fontSize: '28px',
+                              whiteSpace: 'nowrap'
+                            }
+                          : undefined
+                      }
+                    >
                       {formatPrice(product.promoPrice || product.price)}
                     </strong>
                   </div>
 
-                  <div className="admin-product-status">
+                  <div
+                    className="admin-product-status"
+                    style={
+                      isMobile
+                        ? {
+                            paddingLeft: '106px'
+                          }
+                        : undefined
+                    }
+                  >
                     <span
                       className={`status-pill ${
                         isActive ? 'active' : 'inactive'
@@ -461,7 +688,19 @@ slug:
                     </span>
                   </div>
 
-                  <div className="admin-product-actions">
+                  <div
+                    className="admin-product-actions"
+                    style={
+                      isMobile
+                        ? {
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '10px',
+                            width: '100%'
+                          }
+                        : undefined
+                    }
+                  >
                     <button onClick={() => openViewModal(product)}>
                       <Eye size={17} />
                     </button>
@@ -486,8 +725,32 @@ slug:
       </div>
 
       {selectedProduct && (
-        <div className="admin-modal-backdrop">
-          <div className="admin-product-modal">
+        <div
+          className="admin-modal-backdrop"
+          style={
+            isMobile
+              ? {
+                  padding: '18px',
+                  alignItems: 'flex-start',
+                  overflowY: 'auto'
+                }
+              : undefined
+          }
+        >
+          <div
+            className="admin-product-modal"
+            style={
+              isMobile
+                ? {
+                    width: '100%',
+                    maxWidth: '100%',
+                    maxHeight: 'none',
+                    borderRadius: '28px',
+                    padding: '22px'
+                  }
+                : undefined
+            }
+          >
             <div className="admin-modal-head">
               <div>
                 <span>
@@ -511,11 +774,32 @@ slug:
             </div>
 
             {modalMode === 'view' ? (
-              <div className="admin-product-preview">
+              <div
+                className="admin-product-preview"
+                style={
+                  isMobile
+                    ? {
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '18px'
+                      }
+                    : undefined
+                }
+              >
                 {selectedProduct.images?.[0] ? (
                   <img
                     src={selectedProduct.images[0]}
                     alt={selectedProduct.name}
+                    style={
+                      isMobile
+                        ? {
+                            width: '100%',
+                            height: '260px',
+                            objectFit: 'cover',
+                            borderRadius: '22px'
+                          }
+                        : undefined
+                    }
                   />
                 ) : (
                   <div className="admin-empty-state">
@@ -553,7 +837,18 @@ slug:
               </div>
             ) : (
               <div className="admin-product-form">
-                <div className="form-grid">
+                <div
+                  className="form-grid"
+                  style={
+                    isMobile
+                      ? {
+                          display: 'grid',
+                          gridTemplateColumns: '1fr',
+                          gap: '16px'
+                        }
+                      : undefined
+                  }
+                >
                   <label>
                     Nome
 
@@ -579,7 +874,18 @@ slug:
                   </label>
                 </div>
 
-                <div className="form-grid">
+                <div
+                  className="form-grid"
+                  style={
+                    isMobile
+                      ? {
+                          display: 'grid',
+                          gridTemplateColumns: '1fr',
+                          gap: '16px'
+                        }
+                      : undefined
+                  }
+                >
                   <label>
                     Preço
 
@@ -636,7 +942,9 @@ slug:
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files?.[0])}
+                      onChange={(e) =>
+                        handleImageUpload(e.target.files?.[0])
+                      }
                     />
 
                     <span>
@@ -736,6 +1044,14 @@ slug:
                   className="btn btn-primary full"
                   onClick={saveProduct}
                   disabled={uploadingImage}
+                  style={
+                    isMobile
+                      ? {
+                          width: '100%',
+                          minHeight: '56px'
+                        }
+                      : undefined
+                  }
                 >
                   <Save size={18} />
                   {uploadingImage ? 'Aguarde o upload...' : 'Salvar produto'}
