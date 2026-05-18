@@ -6,18 +6,20 @@ import {
   Pencil,
   Eye,
   X,
-  Save
+  Save,
+  Image
 } from 'lucide-react';
 
 import AdminLayout from '../../components/admin/AdminLayout';
 
 import {
   getAllCategoriesAdmin,
-createCategory,
-updateCategory
+  createCategory,
+  updateCategory
 } from '../../services/categoriesService';
 
 import { uploadImage } from '../../services/storageService';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const emptyCategory = {
   id: '',
@@ -29,6 +31,8 @@ const emptyCategory = {
 };
 
 export default function Categories() {
+  const isMobile = useIsMobile(900);
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -40,8 +44,8 @@ export default function Categories() {
   useEffect(() => {
     async function loadCategories() {
       try {
-const data = await getAllCategoriesAdmin();
-        setCategories(data);
+        const data = await getAllCategoriesAdmin();
+        setCategories(data || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -55,7 +59,7 @@ const data = await getAllCategoriesAdmin();
   const filteredCategories = useMemo(() => {
     return categories
       .filter((category) =>
-        category.name
+        (category.name || '')
           .toLowerCase()
           .includes(search.toLowerCase())
       )
@@ -82,12 +86,22 @@ const data = await getAllCategoriesAdmin();
   }
 
   function openEditModal(category) {
-    setSelectedCategory({ ...category });
+    setSelectedCategory({
+      ...emptyCategory,
+      ...category,
+      active: category.active !== false
+    });
+
     setModalMode('edit');
   }
 
   function openViewModal(category) {
-    setSelectedCategory(category);
+    setSelectedCategory({
+      ...emptyCategory,
+      ...category,
+      active: category.active !== false
+    });
+
     setModalMode('view');
   }
 
@@ -127,7 +141,7 @@ const data = await getAllCategoriesAdmin();
   }
 
   async function saveCategory() {
-    if (!selectedCategory.name.trim()) {
+    if (!selectedCategory.name?.trim()) {
       alert('Preencha o nome da categoria.');
       return;
     }
@@ -140,11 +154,13 @@ const data = await getAllCategoriesAdmin();
     try {
       const formattedCategory = {
         ...selectedCategory,
+        name: selectedCategory.name.trim(),
         slug:
-          selectedCategory.slug ||
+          selectedCategory.slug?.trim() ||
           createSlug(selectedCategory.name),
         order: Number(selectedCategory.order || 1),
-        imageUrl: selectedCategory.imageUrl
+        imageUrl: selectedCategory.imageUrl,
+        active: selectedCategory.active !== false
       };
 
       if (modalMode === 'create') {
@@ -180,23 +196,81 @@ const data = await getAllCategoriesAdmin();
 
   return (
     <AdminLayout>
-      <div className="admin-categories-page">
-        <div className="admin-head row">
+      <div
+        className="admin-categories-page"
+        style={
+          isMobile
+            ? {
+                display: 'grid',
+                gap: '22px'
+              }
+            : undefined
+        }
+      >
+        <div
+          className="admin-head row"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '18px'
+                }
+              : undefined
+          }
+        >
           <div>
             <span>Gestão</span>
-            <h1>Categorias</h1>
-            <p>Organize coleções, estilos e categorias exibidas na loja.</p>
+
+            <h1
+              style={
+                isMobile
+                  ? {
+                      fontSize: 'clamp(42px, 13vw, 60px)',
+                      lineHeight: '.92'
+                    }
+                  : undefined
+              }
+            >
+              Categorias
+            </h1>
+
+            <p>
+              Organize coleções, estilos e categorias exibidas na loja.
+            </p>
           </div>
 
-          <button className="btn btn-primary" onClick={openCreateModal}>
+          <button
+            className="btn btn-primary"
+            onClick={openCreateModal}
+            style={
+              isMobile
+                ? {
+                    width: '100%',
+                    minHeight: '56px'
+                  }
+                : undefined
+            }
+          >
             <Plus size={18} />
             Nova categoria
           </button>
         </div>
 
-        <div className="admin-products-toolbar">
+        <div
+          className="admin-products-toolbar"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr'
+                }
+              : undefined
+          }
+        >
           <div className="admin-search">
             <Search size={18} />
+
             <input
               placeholder="Buscar categoria..."
               value={search}
@@ -205,7 +279,18 @@ const data = await getAllCategoriesAdmin();
           </div>
         </div>
 
-        <div className="admin-category-grid">
+        <div
+          className="admin-category-grid"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '18px'
+                }
+              : undefined
+          }
+        >
           {loading && (
             <div className="admin-empty-state">
               <strong>Carregando categorias...</strong>
@@ -214,10 +299,46 @@ const data = await getAllCategoriesAdmin();
 
           {!loading &&
             filteredCategories.map((category) => (
-              <div className="admin-category-card" key={category.id}>
-                <div className="admin-category-image">
+              <div
+                className="admin-category-card"
+                key={category.id}
+                style={
+                  isMobile
+                    ? {
+                        width: '100%',
+                        borderRadius: '28px',
+                        overflow: 'hidden'
+                      }
+                    : undefined
+                }
+              >
+                <div
+                  className="admin-category-image"
+                  style={
+                    isMobile
+                      ? {
+                          minHeight: '260px',
+                          borderRadius: '28px',
+                          overflow: 'hidden'
+                        }
+                      : undefined
+                  }
+                >
                   {category.imageUrl ? (
-                    <img src={category.imageUrl} alt={category.name} />
+                    <img
+                      src={category.imageUrl}
+                      alt={category.name}
+                      loading="lazy"
+                      style={
+                        isMobile
+                          ? {
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }
+                          : undefined
+                      }
+                    />
                   ) : (
                     <div className="admin-empty-state">
                       <strong>Sem imagem</strong>
@@ -233,7 +354,19 @@ const data = await getAllCategoriesAdmin();
                     <p>{category.slug || 'categoria-premium'}</p>
                   </div>
 
-                  <div className="admin-category-actions">
+                  <div
+                    className="admin-category-actions"
+                    style={
+                      isMobile
+                        ? {
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '10px',
+                            marginTop: '12px'
+                          }
+                        : undefined
+                    }
+                  >
                     <button onClick={() => openViewModal(category)}>
                       <Eye size={17} />
                     </button>
@@ -257,8 +390,32 @@ const data = await getAllCategoriesAdmin();
       </div>
 
       {selectedCategory && (
-        <div className="admin-modal-backdrop">
-          <div className="admin-product-modal">
+        <div
+          className="admin-modal-backdrop"
+          style={
+            isMobile
+              ? {
+                  padding: '18px',
+                  alignItems: 'flex-start',
+                  overflowY: 'auto'
+                }
+              : undefined
+          }
+        >
+          <div
+            className="admin-product-modal"
+            style={
+              isMobile
+                ? {
+                    width: '100%',
+                    maxWidth: '100%',
+                    maxHeight: 'none',
+                    borderRadius: '28px',
+                    padding: '22px'
+                  }
+                : undefined
+            }
+          >
             <div className="admin-modal-head">
               <div>
                 <span>
@@ -282,11 +439,32 @@ const data = await getAllCategoriesAdmin();
             </div>
 
             {modalMode === 'view' ? (
-              <div className="admin-category-preview">
+              <div
+                className="admin-category-preview"
+                style={
+                  isMobile
+                    ? {
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '18px'
+                      }
+                    : undefined
+                }
+              >
                 {selectedCategory.imageUrl ? (
                   <img
                     src={selectedCategory.imageUrl}
                     alt={selectedCategory.name}
+                    style={
+                      isMobile
+                        ? {
+                            width: '100%',
+                            height: '260px',
+                            objectFit: 'cover',
+                            borderRadius: '22px'
+                          }
+                        : undefined
+                    }
                   />
                 ) : (
                   <div className="admin-empty-state">
@@ -296,18 +474,38 @@ const data = await getAllCategoriesAdmin();
 
                 <div>
                   <span className="badge inline">Categoria</span>
+
                   <h3>{selectedCategory.name}</h3>
+
                   <p>Slug: {selectedCategory.slug}</p>
                   <p>Ordem de exibição: {selectedCategory.order}</p>
+                  <p>
+                    Status:{' '}
+                    {selectedCategory.active !== false
+                      ? 'Ativa'
+                      : 'Inativa'}
+                  </p>
                 </div>
               </div>
             ) : (
               <div className="admin-product-form">
-                <div className="form-grid">
+                <div
+                  className="form-grid"
+                  style={
+                    isMobile
+                      ? {
+                          display: 'grid',
+                          gridTemplateColumns: '1fr',
+                          gap: '16px'
+                        }
+                      : undefined
+                  }
+                >
                   <label>
                     Nome
+
                     <input
-                      value={selectedCategory.name}
+                      value={selectedCategory.name || ''}
                       onChange={(e) =>
                         updateSelectedCategory('name', e.target.value)
                       }
@@ -317,9 +515,10 @@ const data = await getAllCategoriesAdmin();
 
                   <label>
                     Ordem
+
                     <input
                       type="number"
-                      value={selectedCategory.order}
+                      value={selectedCategory.order || 1}
                       onChange={(e) =>
                         updateSelectedCategory('order', e.target.value)
                       }
@@ -330,6 +529,7 @@ const data = await getAllCategoriesAdmin();
 
                 <label>
                   Slug
+
                   <input
                     value={selectedCategory.slug || ''}
                     onChange={(e) =>
@@ -343,18 +543,23 @@ const data = await getAllCategoriesAdmin();
                   Imagem da categoria
 
                   <div className="admin-upload-box">
-                    {selectedCategory.imageUrl && (
+                    {selectedCategory.imageUrl ? (
                       <img
                         src={selectedCategory.imageUrl}
                         alt="Preview da categoria"
                       />
+                    ) : (
+                      <div className="admin-upload-placeholder">
+                        <Image size={26} />
+                        <strong>Imagem da categoria</strong>
+                      </div>
                     )}
 
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) =>
-                        handleImageUpload(e.target.files[0])
+                        handleImageUpload(e.target.files?.[0])
                       }
                     />
 
@@ -370,7 +575,7 @@ const data = await getAllCategoriesAdmin();
                   <label>
                     <input
                       type="checkbox"
-                      checked={!!selectedCategory.active}
+                      checked={selectedCategory.active !== false}
                       onChange={(e) =>
                         updateSelectedCategory('active', e.target.checked)
                       }
@@ -383,6 +588,14 @@ const data = await getAllCategoriesAdmin();
                   className="btn btn-primary full"
                   onClick={saveCategory}
                   disabled={uploadingImage}
+                  style={
+                    isMobile
+                      ? {
+                          width: '100%',
+                          minHeight: '56px'
+                        }
+                      : undefined
+                  }
                 >
                   <Save size={18} />
                   {uploadingImage

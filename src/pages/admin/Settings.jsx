@@ -17,16 +17,29 @@ import {
   updateStoreSettings
 } from '../../services/settingsService';
 
+import useIsMobile from '../../hooks/useIsMobile';
+
 export default function Settings() {
+  const isMobile = useIsMobile(900);
+
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function loadSettings() {
       try {
         const data = await getStoreSettings();
-        setSettings(data);
+
+        setSettings({
+          ...data,
+          colors: {
+            primary: data?.colors?.primary || '#d4af37',
+            secondary: data?.colors?.secondary || '#111111',
+            background: data?.colors?.background || '#070707'
+          }
+        });
       } catch (error) {
         console.error(error);
       } finally {
@@ -48,45 +61,67 @@ export default function Settings() {
     setSettings((current) => ({
       ...current,
       colors: {
-        ...current.colors,
+        ...(current?.colors || {}),
         [field]: value
       }
     }));
   }
 
- async function saveSettings() {
-  if (!settings?.id) {
-    alert('Configuração da loja não encontrada no Supabase.');
-    return;
-  }
+  async function saveSettings() {
+    if (!settings?.id) {
+      alert('Configuração da loja não encontrada no Supabase.');
+      return;
+    }
 
-  try {
-    setSaved(false);
-
-    const updatedSettings = await updateStoreSettings(
-      settings.id,
-      { ...settings }
-    );
-
-    setSettings({
-      ...updatedSettings
-    });
-
-    setSaved(true);
-
-    setTimeout(() => {
+    try {
+      setSaving(true);
       setSaved(false);
-    }, 1600);
-  } catch (error) {
-    console.error(error);
-    alert('Erro ao salvar configurações.');
+
+      const updatedSettings = await updateStoreSettings(settings.id, {
+        ...settings,
+        colors: {
+          primary: settings.colors?.primary || '#d4af37',
+          secondary: settings.colors?.secondary || '#111111',
+          background: settings.colors?.background || '#070707'
+        }
+      });
+
+      setSettings({
+        ...updatedSettings,
+        colors: {
+          primary: updatedSettings?.colors?.primary || '#d4af37',
+          secondary: updatedSettings?.colors?.secondary || '#111111',
+          background: updatedSettings?.colors?.background || '#070707'
+        }
+      });
+
+      setSaved(true);
+
+      setTimeout(() => {
+        setSaved(false);
+      }, 1600);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao salvar configurações.');
+    } finally {
+      setSaving(false);
+    }
   }
-}
 
   if (loading) {
     return (
       <AdminLayout>
-        <div className="admin-settings-page">
+        <div
+          className="admin-settings-page"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gap: '22px'
+                }
+              : undefined
+          }
+        >
           <div className="admin-empty-state">
             <strong>Carregando configurações...</strong>
           </div>
@@ -98,7 +133,17 @@ export default function Settings() {
   if (!settings) {
     return (
       <AdminLayout>
-        <div className="admin-settings-page">
+        <div
+          className="admin-settings-page"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gap: '22px'
+                }
+              : undefined
+          }
+        >
           <div className="admin-empty-state">
             <strong>Nenhuma configuração encontrada.</strong>
           </div>
@@ -109,24 +154,79 @@ export default function Settings() {
 
   return (
     <AdminLayout>
-      <div className="admin-settings-page">
-        <div className="admin-head">
+      <div
+        className="admin-settings-page"
+        style={
+          isMobile
+            ? {
+                display: 'grid',
+                gap: '22px'
+              }
+            : undefined
+        }
+      >
+        <div
+          className="admin-head"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '12px'
+                }
+              : undefined
+          }
+        >
           <span>Loja</span>
-          <h1>Configurações</h1>
+
+          <h1
+            style={
+              isMobile
+                ? {
+                    fontSize: 'clamp(42px, 13vw, 60px)',
+                    lineHeight: '.92'
+                  }
+                : undefined
+            }
+          >
+            Configurações
+          </h1>
+
           <p>
             Personalize identidade, contatos, aparência e informações da loja.
           </p>
         </div>
 
-        <div className="settings-layout">
-          <div className="settings-sidebar-card">
+        <div
+          className="settings-layout"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '18px'
+                }
+              : undefined
+          }
+        >
+          <div
+            className="settings-sidebar-card"
+            style={
+              isMobile
+                ? {
+                    borderRadius: '28px',
+                    padding: '22px'
+                  }
+                : undefined
+            }
+          >
             <div className="settings-sidebar-top">
               <div className="settings-logo-preview">
                 <Store size={22} />
               </div>
 
               <div>
-                <strong>{settings.storeName}</strong>
+                <strong>{settings.storeName || 'Nome da loja'}</strong>
                 <span>{settings.slogan || 'Premium Collection'}</span>
               </div>
             </div>
@@ -154,8 +254,28 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="settings-content">
-            <div className="settings-section">
+          <div
+            className="settings-content"
+            style={
+              isMobile
+                ? {
+                    display: 'grid',
+                    gap: '18px'
+                  }
+                : undefined
+            }
+          >
+            <div
+              className="settings-section"
+              style={
+                isMobile
+                  ? {
+                      borderRadius: '28px',
+                      padding: '22px'
+                    }
+                  : undefined
+              }
+            >
               <div className="settings-section-head">
                 <span>
                   <Store size={16} />
@@ -165,9 +285,21 @@ export default function Settings() {
                 <h3>Informações principais</h3>
               </div>
 
-              <div className="settings-grid">
+              <div
+                className="settings-grid"
+                style={
+                  isMobile
+                    ? {
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '16px'
+                      }
+                    : undefined
+                }
+              >
                 <label>
                   Nome da loja
+
                   <input
                     value={settings.storeName || ''}
                     onChange={(e) =>
@@ -179,6 +311,7 @@ export default function Settings() {
 
                 <label>
                   Slogan
+
                   <input
                     value={settings.slogan || ''}
                     onChange={(e) =>
@@ -191,6 +324,7 @@ export default function Settings() {
 
               <label>
                 Texto padrão do WhatsApp
+
                 <textarea
                   rows="3"
                   value={settings.defaultWhatsappText || ''}
@@ -202,7 +336,17 @@ export default function Settings() {
               </label>
             </div>
 
-            <div className="settings-section">
+            <div
+              className="settings-section"
+              style={
+                isMobile
+                  ? {
+                      borderRadius: '28px',
+                      padding: '22px'
+                    }
+                  : undefined
+              }
+            >
               <div className="settings-section-head">
                 <span>
                   <MessageCircle size={16} />
@@ -212,9 +356,21 @@ export default function Settings() {
                 <h3>Canais da loja</h3>
               </div>
 
-              <div className="settings-grid">
+              <div
+                className="settings-grid"
+                style={
+                  isMobile
+                    ? {
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '16px'
+                      }
+                    : undefined
+                }
+              >
                 <label>
                   WhatsApp
+
                   <input
                     value={settings.whatsapp || ''}
                     onChange={(e) =>
@@ -226,6 +382,7 @@ export default function Settings() {
 
                 <label>
                   Instagram
+
                   <input
                     value={settings.instagram || ''}
                     onChange={(e) =>
@@ -237,6 +394,7 @@ export default function Settings() {
 
                 <label>
                   E-mail
+
                   <input
                     value={settings.email || ''}
                     onChange={(e) =>
@@ -248,6 +406,7 @@ export default function Settings() {
 
                 <label>
                   Facebook
+
                   <input
                     value={settings.facebook || ''}
                     onChange={(e) =>
@@ -259,6 +418,7 @@ export default function Settings() {
 
                 <label>
                   TikTok
+
                   <input
                     value={settings.tiktok || ''}
                     onChange={(e) =>
@@ -270,7 +430,17 @@ export default function Settings() {
               </div>
             </div>
 
-            <div className="settings-section">
+            <div
+              className="settings-section"
+              style={
+                isMobile
+                  ? {
+                      borderRadius: '28px',
+                      padding: '22px'
+                    }
+                  : undefined
+              }
+            >
               <div className="settings-section-head">
                 <span>
                   <MapPin size={16} />
@@ -280,9 +450,21 @@ export default function Settings() {
                 <h3>Informações da empresa</h3>
               </div>
 
-              <div className="settings-grid">
+              <div
+                className="settings-grid"
+                style={
+                  isMobile
+                    ? {
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '16px'
+                      }
+                    : undefined
+                }
+              >
                 <label>
                   Endereço
+
                   <input
                     value={settings.address || ''}
                     onChange={(e) =>
@@ -294,6 +476,7 @@ export default function Settings() {
 
                 <label>
                   Horário
+
                   <input
                     value={settings.openingHours || ''}
                     onChange={(e) =>
@@ -304,43 +487,18 @@ export default function Settings() {
                 </label>
               </div>
             </div>
-            {/* 
-<div className="settings-section">
-  <div className="settings-section-head">
-    <span>
-      <Globe size={16} />
-      Marca
-    </span>
 
-    <h3>Logo e favicon</h3>
-  </div>
-
-  <div className="settings-grid">
-    <label>
-      URL da logo
-      <input
-        value={settings.logoUrl || ''}
-        onChange={(e) =>
-          updateField('logoUrl', e.target.value)
-        }
-        placeholder="https://..."
-      />
-    </label>
-
-    <label>
-      URL do favicon
-      <input
-        value={settings.faviconUrl || ''}
-        onChange={(e) =>
-          updateField('faviconUrl', e.target.value)
-        }
-        placeholder="https://..."
-      />
-    </label>
-  </div>
-</div>
-*/}
-            <div className="settings-section">
+            <div
+              className="settings-section"
+              style={
+                isMobile
+                  ? {
+                      borderRadius: '28px',
+                      padding: '22px'
+                    }
+                  : undefined
+              }
+            >
               <div className="settings-section-head">
                 <span>
                   <Palette size={16} />
@@ -350,9 +508,21 @@ export default function Settings() {
                 <h3>Cores principais</h3>
               </div>
 
-              <div className="settings-colors">
+              <div
+                className="settings-colors"
+                style={
+                  isMobile
+                    ? {
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '16px'
+                      }
+                    : undefined
+                }
+              >
                 <label>
                   Cor principal
+
                   <div className="color-input">
                     <input
                       type="color"
@@ -368,6 +538,7 @@ export default function Settings() {
 
                 <label>
                   Cor secundária
+
                   <div className="color-input">
                     <input
                       type="color"
@@ -383,6 +554,7 @@ export default function Settings() {
 
                 <label>
                   Cor de fundo
+
                   <div className="color-input">
                     <input
                       type="color"
@@ -399,13 +571,28 @@ export default function Settings() {
             </div>
 
             <button
-  className="btn btn-primary settings-save-btn"
-  type="button"
-  onClick={saveSettings}
->
-  <Save size={18} />
-  {saved ? 'Alterações salvas' : 'Salvar alterações'}
-</button>
+              className="btn btn-primary settings-save-btn"
+              type="button"
+              onClick={saveSettings}
+              disabled={saving}
+              style={
+                isMobile
+                  ? {
+                      width: '100%',
+                      minHeight: '56px',
+                      justifyContent: 'center'
+                    }
+                  : undefined
+              }
+            >
+              <Save size={18} />
+
+              {saving
+                ? 'Salvando...'
+                : saved
+                ? 'Alterações salvas'
+                : 'Salvar alterações'}
+            </button>
           </div>
         </div>
       </div>

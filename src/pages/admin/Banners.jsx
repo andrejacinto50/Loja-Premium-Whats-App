@@ -22,6 +22,7 @@ import {
 } from '../../services/bannersService';
 
 import { uploadImage } from '../../services/storageService';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const emptyBanner = {
   id: '',
@@ -38,6 +39,8 @@ const fallbackImage =
   'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1400&auto=format&fit=crop';
 
 export default function Banners() {
+  const isMobile = useIsMobile(900);
+
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -243,12 +246,44 @@ export default function Banners() {
 
   return (
     <AdminLayout>
-      <div className="admin-banners-page">
-        <div className="admin-head row">
+      <div
+        className="admin-banners-page"
+        style={
+          isMobile
+            ? {
+                display: 'grid',
+                gap: '22px'
+              }
+            : undefined
+        }
+      >
+        <div
+          className="admin-head row"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '18px'
+                }
+              : undefined
+          }
+        >
           <div>
             <span>Gestão</span>
 
-            <h1>Banners</h1>
+            <h1
+              style={
+                isMobile
+                  ? {
+                      fontSize: 'clamp(42px, 13vw, 60px)',
+                      lineHeight: '.92'
+                    }
+                  : undefined
+              }
+            >
+              Banners
+            </h1>
 
             <p>
               Controle o Hero principal da loja e os banners de promoções.
@@ -259,13 +294,34 @@ export default function Banners() {
           <button
             className="btn btn-primary"
             onClick={openCreateModal}
+            style={
+              isMobile
+                ? {
+                    width: '100%',
+                    minHeight: '56px'
+                  }
+                : undefined
+            }
           >
             <Plus size={18} />
             Novo banner
           </button>
         </div>
 
-        <div className="admin-banner-warning">
+        <div
+          className="admin-banner-warning"
+          style={
+            isMobile
+              ? {
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                  padding: '18px',
+                  borderRadius: '22px'
+                }
+              : undefined
+          }
+        >
           <AlertCircle size={18} />
 
           <div>
@@ -277,7 +333,17 @@ export default function Banners() {
           </div>
         </div>
 
-        <div className="admin-products-toolbar">
+        <div
+          className="admin-products-toolbar"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr'
+                }
+              : undefined
+          }
+        >
           <div className="admin-search">
             <Search size={18} />
 
@@ -289,44 +355,56 @@ export default function Banners() {
           </div>
         </div>
 
-        <div className="admin-filter-panel visible">
-          <button
-            className={filter === 'all' ? 'active' : ''}
-            onClick={() => setFilter('all')}
-          >
-            Todos
-          </button>
-
-          <button
-            className={filter === 'hero' ? 'active' : ''}
-            onClick={() => setFilter('hero')}
-          >
-            Hero
-          </button>
-
-          <button
-            className={filter === 'promo' ? 'active' : ''}
-            onClick={() => setFilter('promo')}
-          >
-            Promo
-          </button>
-
-          <button
-            className={filter === 'active' ? 'active' : ''}
-            onClick={() => setFilter('active')}
-          >
-            Ativos
-          </button>
-
-          <button
-            className={filter === 'inactive' ? 'active' : ''}
-            onClick={() => setFilter('inactive')}
-          >
-            Inativos
-          </button>
+        <div
+          className="admin-filter-panel visible"
+          style={
+            isMobile
+              ? {
+                  display: 'flex',
+                  gap: '10px',
+                  overflowX: 'auto',
+                  paddingBottom: '8px'
+                }
+              : undefined
+          }
+        >
+          {[
+            ['all', 'Todos'],
+            ['hero', 'Hero'],
+            ['promo', 'Promo'],
+            ['active', 'Ativos'],
+            ['inactive', 'Inativos']
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              className={filter === value ? 'active' : ''}
+              onClick={() => setFilter(value)}
+              style={
+                isMobile
+                  ? {
+                      flex: '0 0 auto',
+                      whiteSpace: 'nowrap'
+                    }
+                  : undefined
+              }
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
-        <div className="admin-banner-grid">
+        <div
+          className="admin-banner-grid"
+          style={
+            isMobile
+              ? {
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '18px'
+                }
+              : undefined
+          }
+        >
           {loading && (
             <div className="admin-empty-state">
               <strong>Carregando banners...</strong>
@@ -344,12 +422,41 @@ export default function Banners() {
                     isHero ? 'hero-banner-card' : ''
                   }`}
                   key={banner.id}
+                  style={
+                    isMobile
+                      ? {
+                          width: '100%',
+                          borderRadius: '28px',
+                          overflow: 'hidden'
+                        }
+                      : undefined
+                  }
                 >
-                  <div className="admin-banner-image">
+                  <div
+                    className="admin-banner-image"
+                    style={
+                      isMobile
+                        ? {
+                            minHeight: '280px',
+                            borderRadius: '28px',
+                            overflow: 'hidden'
+                          }
+                        : undefined
+                    }
+                  >
                     <img
                       src={banner.imageUrl || fallbackImage}
                       alt={banner.title}
                       loading="lazy"
+                      style={
+                        isMobile
+                          ? {
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }
+                          : undefined
+                      }
                     />
 
                     <div className="admin-banner-overlay"></div>
@@ -380,7 +487,19 @@ export default function Banners() {
                     </div>
                   </div>
 
-                  <div className="admin-banner-actions">
+                  <div
+                    className="admin-banner-actions"
+                    style={
+                      isMobile
+                        ? {
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '10px',
+                            marginTop: '12px'
+                          }
+                        : undefined
+                    }
+                  >
                     <button onClick={() => openViewModal(banner)}>
                       <Eye size={17} />
                     </button>
@@ -404,8 +523,32 @@ export default function Banners() {
       </div>
 
       {selectedBanner && (
-        <div className="admin-modal-backdrop">
-          <div className="admin-product-modal">
+        <div
+          className="admin-modal-backdrop"
+          style={
+            isMobile
+              ? {
+                  padding: '18px',
+                  alignItems: 'flex-start',
+                  overflowY: 'auto'
+                }
+              : undefined
+          }
+        >
+          <div
+            className="admin-product-modal"
+            style={
+              isMobile
+                ? {
+                    width: '100%',
+                    maxWidth: '100%',
+                    maxHeight: 'none',
+                    borderRadius: '28px',
+                    padding: '22px'
+                  }
+                : undefined
+            }
+          >
             <div className="admin-modal-head">
               <div>
                 <span>
@@ -429,10 +572,31 @@ export default function Banners() {
             </div>
 
             {modalMode === 'view' ? (
-              <div className="admin-banner-preview">
+              <div
+                className="admin-banner-preview"
+                style={
+                  isMobile
+                    ? {
+                        display: 'grid',
+                        gridTemplateColumns: '1fr',
+                        gap: '18px'
+                      }
+                    : undefined
+                }
+              >
                 <img
                   src={selectedBanner.imageUrl || fallbackImage}
                   alt={selectedBanner.title}
+                  style={
+                    isMobile
+                      ? {
+                          width: '100%',
+                          height: '260px',
+                          objectFit: 'cover',
+                          borderRadius: '22px'
+                        }
+                      : undefined
+                  }
                 />
 
                 <div>
@@ -466,7 +630,18 @@ export default function Banners() {
               </div>
             ) : (
               <div className="admin-product-form">
-                <div className="form-grid">
+                <div
+                  className="form-grid"
+                  style={
+                    isMobile
+                      ? {
+                          display: 'grid',
+                          gridTemplateColumns: '1fr',
+                          gap: '16px'
+                        }
+                      : undefined
+                  }
+                >
                   <label>
                     Título
 
@@ -557,7 +732,18 @@ export default function Banners() {
                   </div>
                 </label>
 
-                <div className="form-grid">
+                <div
+                  className="form-grid"
+                  style={
+                    isMobile
+                      ? {
+                          display: 'grid',
+                          gridTemplateColumns: '1fr',
+                          gap: '16px'
+                        }
+                      : undefined
+                  }
+                >
                   <label>
                     Texto do botão
 
@@ -600,6 +786,14 @@ export default function Banners() {
                   className="btn btn-primary full"
                   onClick={saveBanner}
                   disabled={uploadingImage}
+                  style={
+                    isMobile
+                      ? {
+                          width: '100%',
+                          minHeight: '56px'
+                        }
+                      : undefined
+                  }
                 >
                   <Save size={18} />
                   {uploadingImage
