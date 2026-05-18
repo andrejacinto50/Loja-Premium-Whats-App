@@ -5226,3 +5226,41 @@ body,
   }
 
 }
+
+/* FIX REAL IPHONE OVERFLOW */
+
+html,
+body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.site-shell,
+.site-main,
+.section,
+.highlights,
+.highlight-card,
+.hero,
+.hero-content,
+.hero-visual {
+  max-width: 100% !important;
+}
+
+@media (max-width: 768px) {
+
+  .highlights {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 18px !important;
+  }
+
+  .highlight-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+
+}
